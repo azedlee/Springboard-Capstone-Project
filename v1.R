@@ -20,10 +20,10 @@ trainX <- trainldx[-2]
 testX <- testldx[-2]
 
 #Create an array to check Cost
-costArray <- seq(1, 1000, by = 100)
+costArray <- seq(0.3, 0.31, by = 0.01)
 
 #Create an array to check Gamma
-gammaArray <- seq(0.1, 1.0, by = 0.1)
+gammaArray <- seq(0.01, 0.011, by = 0.001)
 
 RMSE_Length <- length(gammaArray)
 
@@ -33,7 +33,7 @@ testRMSE <- data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(l
 #For loop to check for best cost
 for(count in 1:(length(costArray)))
 {
-  svm_model <- svm(trainX, y = trainY, kernel = "radial", cost = costArray[count], type = "eps-regression", epsilon = 1, cross = 5)
+  svm_model <- svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", cost = costArray[count], gamma = 1, type = "eps-regression", epsilon = 1)
   predictedY <- predict(svm_model, testX)
   evaluate_RMSE <- sqrt(mean((testY - predictedY)^2))
   testRMSE$Cost[count] <- costArray[count]
@@ -43,42 +43,40 @@ for(count in 1:(length(costArray)))
 #For loop to check for best Gamma
 for(count in 1:length(gammaArray))
 {
-  svm_model <- svm(x = trainX, y = trainY, kernel = "radial", gamma = gammaArray[count], type = "eps-regression", epsilon = 1, cross = 5)
+  svm_model <- svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", gamma = gammaArray[count], cost = 0.3, type = "eps-regression", epsilon = 1)
   predictedY <- predict(svm_model, testX)
   evaluate_RMSE <- sqrt(mean((testY - predictedY)^2))
   testRMSE$Gamma[count] <- gammaArray[count]
+  testRMSE$Cost[count] <- 0.3
   testRMSE$RMSE[count] <- evaluate_RMSE
 }
 
+#Optimal Cost and Gamma
+optimalCost <- 0.3
+optimalGamma <- 0.011
+
 #Testing for trainRMSE
-trainRMSE <- data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "RMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
+trainRMSE <- data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "TrainRMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
 
 for(count in 1:RMSE_Length)
 {
-  svm_model <- svm(x = trainX, y = trainY, kernel = "radial", cost = costArray[count], type = "eps-regression", epsilon = 1, cross = 5)
+  svm_model <- svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", cost = optimalCost, gamma = optimalGamma, type = "eps-regression", epsilon = 1)
   predictedY <- predict(svm_model, trainX)
   evaluate_RMSE <- sqrt(mean((trainY - predictedY)^2))
-  trainRMSE$Cost[count] <- costArray[count]
-  trainRMSE$RMSE[count] <- evaluate_RMSE
-}
-
-for(count in 1:RMSE_Length)
-{
-  svm_model <- svm(x = trainX, y = trainY, kernel = "radial", gamma = gammaArray[count], type = "eps-regression", epsilon = 1, cross = 5)
-  predictedY <- predict(svm_model, trainX)
-  evaluate_RMSE <- sqrt(mean((trainY - predictedY)^2))
-  trainRMSE$Gamma[count] <- gammaArray[count]
-  trainRMSE$RMSE[count] <- evaluate_RMSE
+  trainRMSE$Gamma[count] <- optimalGamma
+  trainRMSE$Cost[count] <- optimalCost
+  trainRMSE$TrainRMSE[count] <- evaluate_RMSE
 }
 
 #Creating 5 equally size folds
-folds <- cut(seq(1, nrow(trainldx)), breaks = 5, labels = FALSE)
+#folds <- cut(seq(1, nrow(trainldx)), breaks = 5, labels = FALSE)
+folds <- round(seq(1, nrow(trainldx), by = nrow(trainldx)/5))
 
 #Calculate CVerror
 CVerror <- vector("list", 5)
 for(i in 1:5)
 {
-  svm_model <- svm(x = trainX[unlist(folds[[-i]])], y = trainY[unlist(folds[[-i]])], gamma = 1, cost = 1, kernel = "radial", type = "eps-regression", epsilon = 1)
+  svm_model <- svm(x = trainX[unlist(folds[[-i]])], y = trainY[unlist(folds[[-i]])], gamma = optimalGamma, cost = optimalCost, kernel = "radial", type = "eps-regression", epsilon = 1)
   predictedY <- predict(svm_model, testX)
   CVerror[i] <- sqrt(mean((trainY - predictedY)^2))
 }
