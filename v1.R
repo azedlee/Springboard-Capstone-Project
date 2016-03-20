@@ -1,7 +1,5 @@
 #Install and Run e1071
 library(e1071)
-library(dplyr)
-library(tidyr)
 
 #Input CSV into variable
 inputData <- SkillCraft1_Dataset
@@ -21,27 +19,72 @@ testY <- testldx$LeagueIndex
 trainX <- trainldx[-2]
 testX <- testldx[-2]
 
-#Add in data set into folds
-set.seed(123)
-split(trainX, sample(rep(1:15, 0.2*nrow(trainX))))
+#Create an array to check Cost
+costArray <- seq(1, 1000, by = 100)
 
 #Create an array to check Gamma
-gammaArray = c(0.05, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65)
+gammaArray <- seq(0.1, 1.0, by = 0.1)
 
-#For loop to check for best Gamma
-RMSE_Result <- data.frame("Gamma" = numeric(15), "RMSE" = numeric(15), stringsAsFactors = FALSE)
-for(gammaArray in 1:15)
+RMSE_Length <- length(gammaArray)
+
+#Save results for testRMSE
+testRMSE <- data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "RMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
+
+#For loop to check for best cost
+for(count in 1:(length(costArray)))
 {
-  svm_model <- svm(GameID ~ ., data = trainX, kernel = "radial", gamma = gammaArray, type = "eps-regression", epsilon = 1, cross = 5)
+  svm_model <- svm(trainX, y = trainY, kernel = "radial", cost = costArray[count], type = "eps-regression", epsilon = 1, cross = 5)
   predictedY <- predict(svm_model, testX)
   evaluate_RMSE <- sqrt(mean((testY - predictedY)^2))
-  RMSE_Result$Gamma <- gammaArray
-  RMSE_Result$RMSE <- evaluate_RMSE
+  testRMSE$Cost[count] <- costArray[count]
+  testRMSE$RMSE[count] <- evaluate_RMSE
 }
 
-###Action Points###
-#i) Ensure testX, testY are subsetted correctly and are of same number of rows.
-#ii) Create an array Gamma = c(0.05, 1, 5, 10 ,15,20 ,25 ,30 ,35 ,40 ,45, 50, 55 ,60 ,65)
-#iii) Do for loop through gamma and obtain cross-validated RMSE for each gamma.
-#Use parameter cross=5, type = ‘eps-regression’,  epsilon = 1
-#iv) After the loop, choose the gamma which gives you the least cross-validated error.
+#For loop to check for best Gamma
+for(count in 1:length(gammaArray))
+{
+  svm_model <- svm(x = trainX, y = trainY, kernel = "radial", gamma = gammaArray[count], type = "eps-regression", epsilon = 1, cross = 5)
+  predictedY <- predict(svm_model, testX)
+  evaluate_RMSE <- sqrt(mean((testY - predictedY)^2))
+  testRMSE$Gamma[count] <- gammaArray[count]
+  testRMSE$RMSE[count] <- evaluate_RMSE
+}
+
+#Testing for trainRMSE
+trainRMSE <- data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "RMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
+
+for(count in 1:RMSE_Length)
+{
+  svm_model <- svm(x = trainX, y = trainY, kernel = "radial", cost = costArray[count], type = "eps-regression", epsilon = 1, cross = 5)
+  predictedY <- predict(svm_model, trainX)
+  evaluate_RMSE <- sqrt(mean((trainY - predictedY)^2))
+  trainRMSE$Cost[count] <- costArray[count]
+  trainRMSE$RMSE[count] <- evaluate_RMSE
+}
+
+for(count in 1:RMSE_Length)
+{
+  svm_model <- svm(x = trainX, y = trainY, kernel = "radial", gamma = gammaArray[count], type = "eps-regression", epsilon = 1, cross = 5)
+  predictedY <- predict(svm_model, trainX)
+  evaluate_RMSE <- sqrt(mean((trainY - predictedY)^2))
+  trainRMSE$Gamma[count] <- gammaArray[count]
+  trainRMSE$RMSE[count] <- evaluate_RMSE
+}
+
+#Creating 5 equally size folds
+folds <- cut(seq(1, nrow(trainldx)), breaks = 5, labels = FALSE)
+
+#Calculate CVerror
+CVerror <- vector("list", 5)
+for(i in 1:5)
+{
+  svm_model <- svm(x = trainX[unlist(folds[[-i]])], y = trainY[unlist(folds[[-i]])], gamma = 1, cost = 1, kernel = "radial", type = "eps-regression", epsilon = 1)
+  predictedY <- predict(svm_model, testX)
+  CVerror[i] <- sqrt(mean((trainY - predictedY)^2))
+}
+cvRMSE <- (CVerror[1] + CVerror[2] + CVerror[3] + CVerror[4] + CVerror[5])/5
+
+##Action Points##
+#vi) Generate a plot with three lines each visualizing trainRMSE, testRMSE and cvRMSE.
+#Commands to use are plot(...), lines(..) etc.
+
