@@ -5,53 +5,53 @@ library(tidyr)
 library(ggplot2)
 
 #Input CSV into variable
-inputData <- SkillCraft1_Dataset
+inputData = SkillCraft1_Dataset
 str(inputData)
 
 #Add in mean(age) to LeagueIndex = 8
-inputData$Age <- as.numeric(as.character(inputData$Age)) #Convert Column from Factor to Numeric
-mean_avg <- round(mean(inputData$Age, na.rm = TRUE)) #Round values
-inputData$Age <- ifelse(is.na(inputData$Age) == TRUE, mean_avg, inputData$Age)
+inputData$Age = as.numeric(as.character(inputData$Age)) #Convert Column from Factor to Numeric
+mean_avg = round(mean(inputData$Age, na.rm = TRUE)) #Round values
+inputData$Age = ifelse(is.na(inputData$Age) == TRUE, mean_avg, inputData$Age)
 
 #Change HoursPerWeek and TotalHours for LeagueIndex = 8 by 2013 minus release date
-inputData$TotalHours <- as.numeric(as.character(inputData$TotalHours)) #Convert Column from Factor to Numeric
-inputData$HoursPerWeek <- as.numeric(as.character(inputData$HoursPerWeek)) #Convert Column from Factor to Numeric
-years_released <- 2013 - 2010
-total_game_hours <- 8 * 20 * 12 * years_released # 8 Hours per day, 20 days per month, 12 months per year, 3 years
-total_game_hours_per_week <- 8 * 20 / 4 # 8 hours per day, 20 days per month, divided by 4 weeks in a month
-inputData$TotalHours <- ifelse(is.na(inputData$TotalHours) == TRUE, total_game_hours, inputData$TotalHours)
-inputData$HoursPerWeek <- ifelse(is.na(inputData$HoursPerWeek) == TRUE, total_game_hours_per_week, inputData$HoursPerWeek)
+inputData$TotalHours = as.numeric(as.character(inputData$TotalHours)) #Convert Column from Factor to Numeric
+inputData$HoursPerWeek = as.numeric(as.character(inputData$HoursPerWeek)) #Convert Column from Factor to Numeric
+years_released = 2013 - 2010
+total_game_hours = 8 * 20 * 12 * years_released # 8 Hours per day, 20 days per month, 12 months per year, 3 years
+total_game_hours_per_week = 8 * 20 / 4 # 8 hours per day, 20 days per month, divided by 4 weeks in a month
+inputData$TotalHours = ifelse(is.na(inputData$TotalHours) == TRUE, total_game_hours, inputData$TotalHours)
+inputData$HoursPerWeek = ifelse(is.na(inputData$HoursPerWeek) == TRUE, total_game_hours_per_week, inputData$HoursPerWeek)
 
 #Manipulated TotalHours data longer than years_released
-inputData$TotalHours <- ifelse(inputData$TotalHours >= 9000, inputData$TotalHours / 10, inputData$TotalHours)
-inputData$TotalHours <- ifelse(inputData$TotalHours >= 100000, inputData$TotalHours / 100, inputData$TotalHours)
+inputData$TotalHours = ifelse(inputData$TotalHours >= 9000, inputData$TotalHours / 10, inputData$TotalHours)
+inputData$TotalHours = ifelse(inputData$TotalHours >= 100000, inputData$TotalHours / 100, inputData$TotalHours)
 
 #Change variables with timestamps into minute: SelectByHotkeys, UniqueHotKeys, MinimapAttacks, MiniMapRightClicks, NumberOfPACs
 ##TotalMapExplored, WorkersMade, UniqueUnitsMade, ComplexUnitsMade, ComplexAbilitiesUsed
-per_timestamp <- 88.5
-per_minute <- 60
-inputData$SelectByHotkeys <- inputData$SelectByHotkeys * per_timestamp * per_minute
-inputData$AssignToHotkeys <- inputData$AssignToHotkeys * per_timestamp * per_minute
-inputData$MinimapAttacks <- inputData$MinimapAttacks * per_timestamp * per_minute
-inputData$MinimapRightClicks <- inputData$MinimapRightClicks * per_timestamp * per_minute
-inputData$NumberOfPACs <- inputData$NumberOfPACs * per_timestamp * per_minute
-inputData$WorkersMade <- inputData$WorkersMade * per_timestamp * per_minute
-inputData$ComplexUnitsMade <- inputData$ComplexUnitsMade * per_timestamp * per_minute
-inputData$ComplexAbilitiesUsed <- inputData$ComplexAbilitiesUsed * per_timestamp * per_minute
+per_timestamp = 88.5
+per_minute = 60
+inputData$SelectByHotkeys = inputData$SelectByHotkeys * per_timestamp * per_minute
+inputData$AssignToHotkeys = inputData$AssignToHotkeys * per_timestamp * per_minute
+inputData$MinimapAttacks = inputData$MinimapAttacks * per_timestamp * per_minute
+inputData$MinimapRightClicks = inputData$MinimapRightClicks * per_timestamp * per_minute
+inputData$NumberOfPACs = inputData$NumberOfPACs * per_timestamp * per_minute
+inputData$WorkersMade = inputData$WorkersMade * per_timestamp * per_minute
+inputData$ComplexUnitsMade = inputData$ComplexUnitsMade * per_timestamp * per_minute
+inputData$ComplexAbilitiesUsed = inputData$ComplexAbilitiesUsed * per_timestamp * per_minute
 
 #Save inputData after Data Wrangling for Regression Analysis
-inputData_reg <- inputData
+inputData_reg = inputData
 
 #Change LeagueIndex Numbers to Actual Rank Names
-inputData$LeagueIndex <- as.character(inputData$LeagueIndex)
-inputData$LeagueIndex[inputData$LeagueIndex == "1"] <- "Bronze"
-inputData$LeagueIndex[inputData$LeagueIndex == "2"] <- "Silver"
-inputData$LeagueIndex[inputData$LeagueIndex == "3"] <- "Gold"
-inputData$LeagueIndex[inputData$LeagueIndex == "4"] <- "Platinum"
-inputData$LeagueIndex[inputData$LeagueIndex == "5"] <- "Diamond"
-inputData$LeagueIndex[inputData$LeagueIndex == "6"] <- "Master"
-inputData$LeagueIndex[inputData$LeagueIndex == "7"] <- "GrandMaster"
-inputData$LeagueIndex[inputData$LeagueIndex == "8"] <- "Professional"
+inputData$LeagueIndex = as.character(inputData$LeagueIndex)
+inputData$LeagueIndex[inputData$LeagueIndex == "1"] = "Bronze"
+inputData$LeagueIndex[inputData$LeagueIndex == "2"] = "Silver"
+inputData$LeagueIndex[inputData$LeagueIndex == "3"] = "Gold"
+inputData$LeagueIndex[inputData$LeagueIndex == "4"] = "Platinum"
+inputData$LeagueIndex[inputData$LeagueIndex == "5"] = "Diamond"
+inputData$LeagueIndex[inputData$LeagueIndex == "6"] = "Master"
+inputData$LeagueIndex[inputData$LeagueIndex == "7"] = "GrandMaster"
+inputData$LeagueIndex[inputData$LeagueIndex == "8"] = "Professional"
 inputData$LeagueIndex <- factor(inputData$LeagueIndex, levels = c("Bronze", "Silver", 
                                                                   "Gold", "Platinum", 
                                                                   "Diamond", "Master", 
@@ -132,7 +132,7 @@ ggplot(data = inputData, aes(x = LeagueIndex, y = ActionsInPAC, fill = LeagueInd
 ggsave('Number of PACs per Minute vs Ranks.png')
 
 ##Median Actions in PAC vs Median Number of PACs (colored by Ranks)
-LI_aip_nop <- inputData %>%
+LI_aip_nop = inputData %>%
   group_by(LeagueIndex) %>%
   summarise(median_aip = median(as.numeric(ActionsInPAC)),
             median_nop = median(as.numeric(NumberOfPACs)),
@@ -147,7 +147,7 @@ ggplot(data = LI_aip_nop, aes(x = median_nop, y = median_aip)) +
 ggsave("Actions in PAC vs Number of PACs in Ranks.png")
 
 ##APM vs PACs
-LI_apm_nop <- inputData %>%
+LI_apm_nop = inputData %>%
   group_by(LeagueIndex) %>%
   summarise(median_apm = median(APM),
             median_nop = median(NumberOfPACs),
@@ -160,7 +160,7 @@ ggplot(data = LI_apm_nop, aes(x = median_apm, y = median_nop)) +
   labs(x = "Median Actions per Minute", y = "Median Number of Perception Action Cycles per Minute")
 ggsave("Actions per Minute vs Perception Action Cycles per Minute.png")
 
-LI_apm_nop_mean <- inputData %>%
+LI_apm_nop_mean = inputData %>%
   group_by(LeagueIndex) %>%
   summarise(mean_apm = mean(APM),
             mean_nop = mean(NumberOfPACs),
@@ -179,77 +179,77 @@ cor.test(LI_apm_nop_mean$mean_apm, LI_apm_nop_mean$mean_nop, method = "p")
 
 #Random number generator to create trainldx and testldx
 set.seed(1234)
-completeSet <- sample(nrow(inputData), 0.7*nrow(inputData), replace = FALSE)
-trainldx <- inputData_reg[completeSet,]
-testldx <- inputData_reg[-completeSet,]
+completeSet = sample(nrow(inputData), 0.7*nrow(inputData), replace = FALSE)
+trainldx = inputData_reg[completeSet,]
+testldx = inputData_reg[-completeSet,]
 
 #Create trainY and testY - LeagueIndex requires to be tested against
-trainY <- trainldx$LeagueIndex
-testY <- testldx$LeagueIndex
+trainY = trainldx$LeagueIndex
+testY = testldx$LeagueIndex
 
 #Create trainX and testX - columns to test against trainY and testY
-trainX <- trainldx[-2]
-testX <- testldx[-2]
+trainX = trainldx[-2]
+testX = testldx[-2]
 
 #Create an array to check Cost
-costArray <- seq(0.25, 0.35, by = 0.01)
+costArray = seq(0.25, 0.35, by = 0.01)
 
 #Create an array to check Gamma
-gammaArray <- seq(0.005, 0.015, by = 0.001)
+gammaArray = seq(0.005, 0.015, by = 0.001)
 
-RMSE_Length <- length(gammaArray)
+RMSE_Length = length(gammaArray)
 
 #Save results for testRMSE
-testRMSE <- data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "RMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
+testRMSE = data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "RMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
 
 #For loop to check for best cost
 for(count in 1:RMSE_Length)
 {
-  svm_model <- svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", cost = costArray[count], gamma = 1, type = "eps-regression", epsilon = 1)
-  predictedY <- predict(svm_model, testX)
-  evaluate_RMSE <- sqrt(mean((testY - predictedY)^2))
-  testRMSE$Cost[count] <- costArray[count]
-  testRMSE$RMSE[count] <- evaluate_RMSE
+  svm_model = svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", cost = costArray[count], gamma = 1, type = "eps-regression", epsilon = 1)
+  predictedY = predict(svm_model, testX)
+  evaluate_RMSE = sqrt(mean((testY - predictedY)^2))
+  testRMSE$Cost[count] = costArray[count]
+  testRMSE$RMSE[count] = evaluate_RMSE
 }
 
 #For loop to check for best Gamma
 for(count in 1:RMSE_Length)
 {
-  svm_model <- svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", gamma = gammaArray[count], cost = costArray[count], type = "eps-regression", epsilon = 1)
-  predictedY <- predict(svm_model, testX)
-  evaluate_RMSE <- sqrt(mean((testY - predictedY)^2))
-  testRMSE$Gamma[count] <- gammaArray[count]
-  testRMSE$Cost[count] <- costArray[count]
-  testRMSE$RMSE[count] <- evaluate_RMSE
+  svm_model = svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", gamma = gammaArray[count], cost = costArray[count], type = "eps-regression", epsilon = 1)
+  predictedY = predict(svm_model, testX)
+  evaluate_RMSE = sqrt(mean((testY - predictedY)^2))
+  testRMSE$Gamma[count] = gammaArray[count]
+  testRMSE$Cost[count] = costArray[count]
+  testRMSE$RMSE[count] = evaluate_RMSE
 }
 
 #Optimal Cost and Gamma
-optimalCost <- 0.32
-optimalGamma <- 0.012
+optimalCost = 0.32
+optimalGamma = 0.012
 
 #Testing for trainRMSE
-trainRMSE <- data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "TrainRMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
+trainRMSE = data.frame("Gamma" = numeric(length(gammaArray)), "Cost" = numeric(length(costArray)), "TrainRMSE" = numeric(RMSE_Length), stringsAsFactors = FALSE)
 
 for(count in 1:RMSE_Length)
 {
-  svm_model <- svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", gamma = gammaArray[count], cost = costArray[count], type = "eps-regression", epsilon = 1)
-  predictedY <- predict(svm_model, trainX)
-  evaluate_RMSE <- sqrt(mean((trainY - predictedY)^2))
-  trainRMSE$Gamma[count] <- gammaArray[count]
-  trainRMSE$Cost[count] <- costArray[count]
-  trainRMSE$TrainRMSE[count] <- evaluate_RMSE
+  svm_model = svm(trainY ~ ., data = cbind(trainX, trainY), kernel = "radial", gamma = gammaArray[count], cost = costArray[count], type = "eps-regression", epsilon = 1)
+  predictedY = predict(svm_model, trainX)
+  evaluate_RMSE = sqrt(mean((trainY - predictedY)^2))
+  trainRMSE$Gamma[count] = gammaArray[count]
+  trainRMSE$Cost[count] = costArray[count]
+  trainRMSE$TrainRMSE[count] = evaluate_RMSE
 }
 
 #Caret package k-fold Cross Validation
 library(caret)
 library(kernlab)
 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 5)
-grid <- expand.grid(C = seq(0.25, 0.35, 0.01))
-fit.registered <- train(trainY~., data = cbind(trainX, trainY), trControl = fitControl,
+fitControl = trainControl(method = "repeatedcv", number = 5, repeats = 5)
+grid = expand.grid(C = seq(0.25, 0.35, 0.01))
+fit.registered = train(trainY~., data = cbind(trainX, trainY), trControl = fitControl,
                         method = "svmRadialCost", tuneLength = 9, preProc = c("center", "scale"), tuneGrid = grid)
-prediction.registered <- predict(fit.registered, testX)
-cv_RMSE <- sqrt(mean((prediction.registered - testY)^2))
+prediction.registered = predict(fit.registered, testX)
+cv_RMSE = sqrt(mean((prediction.registered - testY)^2))
 cv_RMSE
 
 #Train RMSE vs Test RMSE vs k-fold CV Error plot
